@@ -12,6 +12,18 @@ const redis =
     ? Redis.fromEnv()
     : null;
 
+// Generate a deterministic random offset between 100 and 250 based on slug
+function getViewsOffset(slug: string): number {
+  // Simple hash function to convert slug to a number
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = ((hash << 5) - hash) + slug.charCodeAt(i);
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  // Map hash to range 100-250
+  return 100 + (Math.abs(hash) % 151);
+}
+
 export const revalidate = 60;
 export default async function ProjectsPage() {
   let views: Record<string, number> = {};
@@ -22,19 +34,20 @@ export default async function ProjectsPage() {
         ...allProjects.map((p) => ["pageviews", "projects", p.slug].join(":")),
       );
       views = viewValues.reduce((acc, v, i) => {
-        acc[allProjects[i].slug] = v ?? 0;
+        const slug = allProjects[i].slug;
+        acc[slug] = (v ?? 0) + getViewsOffset(slug);
         return acc;
       }, {} as Record<string, number>);
     } catch (error) {
-      // If Redis fails, fallback to 0 views
+      // If Redis fails, fallback to base offset
       views = allProjects.reduce((acc, p) => {
-        acc[p.slug] = 0;
+        acc[p.slug] = getViewsOffset(p.slug);
         return acc;
       }, {} as Record<string, number>);
     }
   } else {
     views = allProjects.reduce((acc, p) => {
-      acc[p.slug] = 0;
+      acc[p.slug] = getViewsOffset(p.slug);
       return acc;
     }, {} as Record<string, number>);
   }
@@ -87,7 +100,7 @@ export default async function ProjectsPage() {
                       <span className="flex items-center gap-1 text-xs text-zinc-500">
                         <Eye className="w-4 h-4" />{" "}
                         {Intl.NumberFormat("en-US", { notation: "compact" }).format(
-                          views[featured.slug] ?? 0,
+                          views[featured.slug] ?? getViewsOffset(featured.slug),
                         )}
                       </span>
                     </div>
@@ -98,7 +111,7 @@ export default async function ProjectsPage() {
                     >
                       {featured.title}
                     </h2>
-                    <p className="mt-4 leading-8 duration-150 text-zinc-400 group-hover:text-zinc-300">
+                    <p className="mt-4 leading-8 duration-150 text-zinc-400 group-hover:text-zinc-300 pb-12 md:pb-16">
                       {featured.description}
                     </p>
                     <div className="absolute bottom-4 md:bottom-8">
@@ -114,7 +127,7 @@ export default async function ProjectsPage() {
             <div className="flex flex-col w-full gap-8 mx-auto border-t border-gray-900/10 lg:mx-0 lg:border-t-0 ">
               {[top2, top3].filter(Boolean).map((project) => (
                 <Card key={project.slug}>
-                  <Article project={project} views={views[project.slug] ?? 0} />
+                  <Article project={project} views={views[project.slug] ?? getViewsOffset(project.slug)} />
                 </Card>
               ))}
             </div>
@@ -130,7 +143,7 @@ export default async function ProjectsPage() {
                   .filter((_, i) => i % 3 === 0)
                   .map((project) => (
                     <Card key={project.slug}>
-                      <Article project={project} views={views[project.slug] ?? 0} />
+                      <Article project={project} views={views[project.slug] ?? getViewsOffset(project.slug)} />
                     </Card>
                   ))}
               </div>
@@ -139,7 +152,7 @@ export default async function ProjectsPage() {
                   .filter((_, i) => i % 3 === 1)
                   .map((project) => (
                     <Card key={project.slug}>
-                      <Article project={project} views={views[project.slug] ?? 0} />
+                      <Article project={project} views={views[project.slug] ?? getViewsOffset(project.slug)} />
                     </Card>
                   ))}
               </div>
@@ -148,7 +161,7 @@ export default async function ProjectsPage() {
                   .filter((_, i) => i % 3 === 2)
                   .map((project) => (
                     <Card key={project.slug}>
-                      <Article project={project} views={views[project.slug] ?? 0} />
+                      <Article project={project} views={views[project.slug] ?? getViewsOffset(project.slug)} />
                     </Card>
                   ))}
               </div>

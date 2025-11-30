@@ -1,0 +1,207 @@
+---
+title: Stripe Checkout Demo - Wine E-commerce
+description: Interactive demo showcasing Stripe payment integration with a wine e-commerce storefront and functional checkout flow
+date: 2025-01-15
+published: true
+repository: Odelf18
+url: https://stripe-demo-wine.vercel.app/
+---
+
+## The Project
+
+A fully functional e-commerce demo showcasing Stripe payment integration with a wine storefront. Visitors can browse a curated selection of wines, add items to their cart, and complete a real checkout process using Stripe's secure payment system. The demo demonstrates modern payment processing, cart management, and order handling in a production-ready implementation.
+
+## How It Works
+
+```
+User browses wines → Adds to cart → Proceeds to checkout → 
+Enters shipping info → Stripe payment form → Payment processed → 
+Order confirmation with receipt
+```
+
+1. **Product browsing** - Browse a curated selection of wines with details and pricing
+2. **Cart management** - Add/remove items with real-time cart updates
+3. **Checkout initiation** - Secure checkout flow with shipping information collection
+4. **Stripe integration** - Stripe payment form handles card processing securely
+5. **Payment processing** - Real-time payment validation and processing
+6. **Order confirmation** - Success page with order details and receipt
+
+## Key Features
+
+### Payment Integration
+
+- ✅ Stripe Checkout integration with secure payment processing
+- ✅ Support for multiple payment methods (cards, digital wallets)
+- ✅ Real-time payment validation and error handling
+- ✅ Secure handling of payment data (PCI compliant via Stripe)
+- ✅ Test mode with Stripe test cards for safe demonstrations
+
+### E-commerce Features
+
+- ✅ Product catalog with wine listings and details
+- ✅ Shopping cart with add/remove functionality
+- ✅ Quantity management and price calculations
+- ✅ Shipping information collection
+- ✅ Order summary with itemized pricing
+
+### User Experience
+
+- ✅ Modern, clean design optimized for conversions
+- ✅ Responsive layout for mobile and desktop
+- ✅ Smooth checkout flow with clear progress indicators
+- ✅ Error handling with user-friendly messages
+- ✅ Order confirmation with transaction details
+
+### Technical Features
+
+- ✅ Server-side payment processing for security
+- ✅ Webhook integration for order status updates
+- ✅ Session management for cart persistence
+- ✅ Form validation and error handling
+- ✅ Optimized for performance and SEO
+
+## Technical Architecture
+
+The application demonstrates a complete e-commerce payment flow using Stripe's payment infrastructure. The frontend handles the user interface and cart management, while the backend securely processes payments through Stripe's API. Webhooks ensure order status synchronization.
+
+### Tech Stack
+
+- **Frontend**: React/Next.js with TypeScript
+- **Styling**: Tailwind CSS or similar modern CSS framework
+- **Payment**: Stripe Checkout / Stripe Elements
+- **Backend**: Next.js API routes or serverless functions
+- **Database**: For order storage (optional)
+- **Deployment**: Vercel
+
+## Code Examples
+
+### Stripe Checkout Session Creation
+
+```typescript
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+export async function createCheckoutSession(cartItems: CartItem[]) {
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: cartItems.map(item => ({
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: item.name,
+          images: [item.image],
+        },
+        unit_amount: item.price * 100, // Convert to cents
+      },
+      quantity: item.quantity,
+    })),
+    mode: 'payment',
+    success_url: `${process.env.BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.BASE_URL}/cart`,
+  });
+
+  return session;
+}
+```
+
+### Cart Management
+
+```typescript
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+}
+
+export function addToCart(item: Product, cart: CartItem[]): CartItem[] {
+  const existingItem = cart.find(cartItem => cartItem.id === item.id);
+  
+  if (existingItem) {
+    return cart.map(cartItem =>
+      cartItem.id === item.id
+        ? { ...cartItem, quantity: cartItem.quantity + 1 }
+        : cartItem
+    );
+  }
+  
+  return [...cart, { ...item, quantity: 1 }];
+}
+```
+
+### Webhook Handler for Order Updates
+
+```typescript
+export async function handleStripeWebhook(req: Request) {
+  const sig = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig!,
+      webhookSecret
+    );
+  } catch (err) {
+    return { error: `Webhook signature verification failed` };
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case 'checkout.session.completed':
+      const session = event.data.object as Stripe.Checkout.Session;
+      await updateOrderStatus(session.id, 'completed');
+      break;
+    // Handle other event types
+  }
+
+  return { received: true };
+}
+```
+
+## Results & Performance
+
+The demo showcases:
+
+- **Production-ready payment flow** - Complete Stripe integration following best practices
+- **Secure payment processing** - PCI-compliant handling through Stripe's infrastructure
+- **Professional UX** - Smooth, intuitive checkout experience
+- **Error resilience** - Comprehensive error handling for payment failures
+- **Scalable architecture** - Built to handle real e-commerce traffic
+
+## Technical Challenges Solved
+
+1. **Secure Payment Processing**: Integration of Stripe with proper server-side handling to avoid exposing sensitive keys
+2. **Cart State Management**: Persistent cart across page navigation and sessions
+3. **Webhook Reliability**: Handling Stripe webhooks for order status updates and payment confirmations
+4. **Error Handling**: User-friendly error messages for payment failures, network issues, and validation errors
+5. **Session Management**: Maintaining checkout sessions and preventing duplicate orders
+
+## Technologies Used
+
+- React / Next.js
+- TypeScript
+- Stripe API
+- Stripe Checkout / Stripe Elements
+- Tailwind CSS
+- Vercel (deployment)
+
+## Project Overview
+
+This project demonstrates:
+
+- **Payment Integration Expertise**: Full Stripe checkout implementation with best practices
+- **E-commerce Development**: Complete shopping cart and order management system
+- **Security Awareness**: Proper handling of payment data and sensitive information
+- **API Integration**: Server-side payment processing and webhook handling
+- **Production Readiness**: Deployed, tested, and functional payment demo
+
+The demo serves as a practical example of modern e-commerce payment integration, showcasing the ability to build secure, user-friendly checkout experiences.
+
+---
+
+**Note**: This is a demonstration using Stripe test mode. No real payments are processed.

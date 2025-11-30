@@ -1,0 +1,174 @@
+---
+title: OANDA Strategy Trading Bot
+description: Automated trading system connecting TradingView strategies to OANDA broker with real-time notifications
+date: 2025-01-15
+published: true
+repository: Odelf18
+---
+
+## The Project
+
+An automated trading system that transforms TradingView signals into real orders on the OANDA broker. The bot listens to webhook alerts from your TradingView strategies and automatically executes trades with integrated risk management.
+
+## How It Works
+
+```
+TradingView Strategy → Webhook → Bot Server → OANDA API → Trade Executed
+                                              ↓
+                                    Notifications (Email + Telegram)
+```
+
+1. **TradingView** detects a signal based on your strategy
+2. **Webhook** sends the alert to the bot
+3. **Bot** validates, calculates position size and executes the trade
+4. **OANDA** receives the order with automatic Take Profit and Stop Loss
+5. **Notifications** alert you via email and Telegram
+
+## Key Features
+
+### Automated Trading
+
+- ✅ Automatic trade execution from TradingView
+- ✅ Multi-currency (Forex) and cryptocurrency support in parallel
+- ✅ Automatic Take Profit and Stop Loss
+- ✅ Risk management per position
+- ✅ Intelligent position sizing calculation
+
+### Security & Reliability
+
+- ✅ IP whitelist protection for webhooks
+- ✅ Automatic retry (3 attempts) on error
+- ✅ Error notifications via email and Telegram
+- ✅ Strict validation of all incoming signals
+- ✅ Serverless deployment on Vercel
+
+### Real-time Notifications
+
+- ✅ **Email**: Detailed alerts for every trade and error
+- ✅ **Telegram**: Instant notifications with formatting
+- ✅ Complete logs of all operations
+
+## Technical Architecture
+
+The system is built with **Node.js** and deployed on **Vercel** in serverless mode. It uses the OANDA REST API for order execution and integrates notification services to keep you informed in real-time.
+
+### Tech Stack
+
+- **Runtime**: Node.js (serverless functions)
+- **Deployment**: Vercel
+- **API**: OANDA REST API
+- **Notifications**: Telegram Bot API + SMTP
+- **Security**: IP whitelist + signature validation
+
+## Code Examples
+
+### Signal Handling with Retry
+
+```typescript
+async function executeTradeWithRetry(signal: Signal, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await processSignal(signal);
+      await notifySuccess(result);
+      return result;
+    } catch (error) {
+      if (attempt === maxRetries) {
+        await notifyError(`Trade failed after ${maxRetries} attempts: ${error.message}`);
+        throw error;
+      }
+      await sleep(1000 * attempt); // Exponential backoff
+    }
+  }
+}
+```
+
+### Multi-Currency Support
+
+```typescript
+async function processSignal(signal: Signal) {
+  // Support Forex and Crypto
+  const isForex = signal.instrument.includes('_');
+  const isCrypto = signal.instrument.includes('BTC') || signal.instrument.includes('ETH');
+  
+  // Position calculation adapted to instrument type
+  const positionSize = calculatePositionSize(
+    accountBalance,
+    signal.sl,
+    signal.price,
+    isCrypto ? 0.01 : 0.02 // Different risk for crypto
+  );
+  
+  return await oandaClient.createOrder(signal.instrument, positionSize);
+}
+```
+
+### IP Whitelist Protection
+
+```typescript
+const ALLOWED_IPS = process.env.WEBHOOK_ALLOWED_IPS?.split(',') || [];
+
+app.post('/webhook/tradingview', (req, res) => {
+  const clientIP = req.ip || req.connection.remoteAddress;
+  
+  if (!ALLOWED_IPS.includes(clientIP)) {
+    return res.status(403).json({ error: 'IP not whitelisted' });
+  }
+  
+  // Process signal...
+});
+```
+
+## Results & Performance
+
+The bot enables:
+
+- **Automation** of trade execution 24/7 without manual intervention
+- **Reduction** of human errors and execution delays
+- **Consistent** risk management across all trades
+- **Tracking** of all operations with real-time notifications
+
+## Technical Challenges Solved
+
+1. **TradingView → OANDA Integration**: Bridge between two different systems
+2. **Error Handling**: Retry system with exponential backoff
+3. **Security**: Webhook protection via IP whitelist
+4. **Multi-Instruments**: Simultaneous Forex and Crypto support with different logics
+5. **Serverless**: Adaptation for Vercel with cold start management
+
+## Deployment
+
+The project is deployed on **Vercel** in serverless mode, enabling automatic scalability and 24/7 availability without infrastructure management.
+
+```typescript
+// vercel.json
+{
+  "functions": {
+    "api/webhook.ts": {
+      "maxDuration": 30
+    }
+  }
+}
+```
+
+## Technologies Used
+
+- Node.js / TypeScript
+- Express.js (API routes)
+- OANDA REST API
+- Telegram Bot API
+- Nodemailer (SMTP)
+- Vercel Serverless Functions
+
+## Project Overview
+
+This project demonstrates the ability to:
+
+- Integrate complex third-party APIs (TradingView, OANDA)
+- Implement robust retry systems
+- Manage webhook endpoint security
+- Deploy serverless applications
+- Create multi-channel notification systems
+
+---
+
+**Note**: This project is for educational purposes. Trading involves substantial risk of capital loss.

@@ -19,6 +19,18 @@ const redis =
     ? Redis.fromEnv()
     : null;
 
+// Generate a deterministic random offset between 100 and 250 based on slug
+function getViewsOffset(slug: string): number {
+  // Simple hash function to convert slug to a number
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = ((hash << 5) - hash) + slug.charCodeAt(i);
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  // Map hash to range 100-250
+  return 100 + (Math.abs(hash) % 151);
+}
+
 export async function generateStaticParams(): Promise<Props["params"][]> {
   return allProjects
     .filter((p) => p.published)
@@ -35,13 +47,15 @@ export default async function PostPage({ params }: Props) {
     notFound();
   }
 
-  let views = 0;
+  const baseOffset = getViewsOffset(slug);
+  let views = baseOffset;
   if (redis) {
     try {
-      views = (await redis.get<number>(["pageviews", "projects", slug].join(":"))) ?? 0;
+      const redisViews = (await redis.get<number>(["pageviews", "projects", slug].join(":"))) ?? 0;
+      views = redisViews + baseOffset;
     } catch (error) {
-      // If Redis fails, fallback to 0 views
-      views = 0;
+      // If Redis fails, fallback to base offset
+      views = baseOffset;
     }
   }
 

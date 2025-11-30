@@ -52,5 +52,5 @@ git push -u origin main
 N'oubliez pas de mettre à jour :
 - `app/layout.tsx` : métadonnées SEO (title, description, etc.)
 - README.md : description de votre projet
-- Tous les liens et références à chronark
+- Tous les liens et références personnels
 

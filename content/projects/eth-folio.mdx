@@ -1,0 +1,181 @@
+---
+title: EtherFolio - Web3 Checkout Demo
+description: Interactive demo showcasing functional crypto checkout integration on Sepolia testnet with MetaMask wallet connection
+date: 2025-01-20
+published: true
+repository: Odelf18/ETH_folio
+url: https://eth-folio.vercel.app/
+---
+
+## The Project
+
+EtherFolio is an interactive freelance portfolio website that demonstrates Web3 payment integration in action. Instead of just showing what I can build, visitors can actually connect their MetaMask wallet and experience a real crypto checkout flow on the Sepolia testnet. The site showcases three service packages (Smart Contract Audits, Full Stack dApps, and Consulting) with a fully functional payment system.
+
+## How It Works
+
+```
+User visits site → Connects MetaMask → Selects service plan → 
+Checkout modal opens → Network validation → Transaction sent → 
+Success confirmation with transaction hash
+```
+
+1. **User connects wallet** - MetaMask integration detects and connects the user's wallet
+2. **Network check** - Automatically validates or switches to Sepolia testnet
+3. **Plan selection** - User chooses from three service packages with transparent pricing
+4. **Checkout flow** - Multi-step modal guides through connection, network switch, and payment
+5. **Transaction processing** - Real-time status updates and error handling
+6. **Confirmation** - Success screen with transaction hash and Etherscan link
+
+## Key Features
+
+### Web3 Integration
+
+- ✅ MetaMask wallet connection with automatic detection
+- ✅ Automatic network switching to Sepolia testnet
+- ✅ Real-time wallet balance and address display
+- ✅ Transaction status tracking with visual feedback
+- ✅ Secure payment processing using Ethers.js v6
+
+### User Experience
+
+- ✅ Modern glassmorphism design with Tailwind CSS
+- ✅ Responsive layout for all device sizes
+- ✅ Toast notifications for user feedback
+- ✅ Multi-step checkout modal with progress indicator
+- ✅ Wallet dropdown with copy address and disconnect
+
+### Technical Features
+
+- ✅ React 19 with TypeScript for type safety
+- ✅ Vite for fast development and optimized builds
+- ✅ Framer Motion for smooth animations
+- ✅ Error handling for network issues and user rejections
+- ✅ Auto-reconnection on wallet account changes
+
+## Technical Architecture
+
+The application is built as a single-page React application using Vite for build tooling. Web3 functionality is abstracted into a dedicated service layer that handles all Ethereum interactions. The UI components are modular and reusable, with state management for wallet connection and transaction status.
+
+### Tech Stack
+
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS with custom design system
+- **Web3**: Ethers.js v6 for blockchain interactions
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
+- **Deployment**: Vercel
+
+## Code Examples
+
+### Wallet Connection Service
+
+```typescript
+export const connectWallet = async (): Promise<WalletState> => {
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const accounts = await provider.send("eth_requestAccounts", []);
+  const network = await provider.getNetwork();
+  const balance = await provider.getBalance(accounts[0]);
+  
+  return {
+    address: accounts[0],
+    chainId: "0x" + network.chainId.toString(16),
+    status: chainIdHex === SEPOLIA_CHAIN_ID ? 
+      Web3Status.CONNECTED : Web3Status.WRONG_NETWORK,
+    balance: ethers.formatEther(balance)
+  };
+};
+```
+
+### Payment Transaction
+
+```typescript
+export const sendPayment = async (
+  toAddress: string, 
+  amountEth: string
+): Promise<string> => {
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const amountWei = ethers.parseEther(amountEth);
+  
+  // Validate balance before sending
+  const balance = await provider.getBalance(await signer.getAddress());
+  if (balance < amountWei) {
+    throw new Error("Insufficient balance");
+  }
+  
+  const tx = await signer.sendTransaction({
+    to: toAddress,
+    value: amountWei
+  });
+  
+  return tx.hash;
+};
+```
+
+### Network Switching with Fallback
+
+```typescript
+export const switchNetwork = async (): Promise<boolean> => {
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: SEPOLIA_CHAIN_ID }],
+    });
+    return true;
+  } catch (error) {
+    // If chain doesn't exist, add it
+    if (error.code === 4902) {
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: SEPOLIA_CHAIN_ID,
+          chainName: 'Sepolia Testnet',
+          rpcUrls: SEPOLIA_RPC_URLS,
+          nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }
+        }]
+      });
+    }
+  }
+};
+```
+
+## Results & Performance
+
+The portfolio demonstrates:
+
+- **Real Web3 integration** - Visitors can interact with actual blockchain functionality
+- **Professional presentation** - Modern design showcases attention to UX/UI detail
+- **Technical credibility** - Live demo proves Web3 development capabilities
+- **Error resilience** - Handles network issues, user rejections, and edge cases gracefully
+- **Fast load times** - Optimized Vite build with code splitting
+
+## Technical Challenges Solved
+
+1. **Wallet State Management**: Real-time synchronization of wallet connection, network status, and balance across components
+2. **Network Switching**: Automatic detection and switching to Sepolia, with fallback to add network if missing
+3. **Transaction Error Handling**: Comprehensive error handling for user rejections, insufficient funds, and network errors
+4. **User Experience Flow**: Multi-step checkout modal that adapts based on wallet state and transaction status
+5. **Event Listeners**: Proper cleanup of Ethereum event listeners (accountsChanged, chainChanged) to prevent memory leaks
+
+## Technologies Used
+
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- Ethers.js v6
+- Framer Motion
+- Lucide React
+- Vercel (deployment)
+
+## Project Overview
+
+This project showcases:
+
+- **Web3 Development Expertise**: Full integration of Ethereum blockchain functionality
+- **Modern Frontend Skills**: React 19, TypeScript, and modern build tools
+- **UX Design**: Intuitive user flows for complex Web3 interactions
+- **Error Handling**: Robust error management for blockchain transactions
+- **Production Readiness**: Deployed, tested, and functional demo
+
+The portfolio serves as both a demonstration of technical skills and a functional showcase that visitors can interact with, making it more engaging than traditional static portfolios.

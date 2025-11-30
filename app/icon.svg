@@ -1,0 +1,31 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Black background -->
+  <rect width="400" height="400" fill="#000000"/>
+  
+  <!-- Letter "O" - stylized as code bracket -->
+  <g transform="translate(100, 150)">
+    <path d="M 30 20 Q 10 20 10 40 L 10 80 Q 10 100 30 100" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="8" 
+          stroke-linecap="round"/>
+    <path d="M 50 20 Q 70 20 70 40 L 70 80 Q 70 100 50 100" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="8" 
+          stroke-linecap="round"/>
+  </g>
+  
+  <!-- Letter "D" - geometric style -->
+  <g transform="translate(210, 150)">
+    <line x1="10" y1="20" x2="10" y2="100" 
+          stroke="#FFFFFF" 
+          stroke-width="8" 
+          stroke-linecap="round"/>
+    <path d="M 10 20 L 40 20 Q 70 35 70 60 Q 70 85 40 100 L 10 100" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="8" 
+          stroke-linecap="round"/>
+  </g>
+</svg>

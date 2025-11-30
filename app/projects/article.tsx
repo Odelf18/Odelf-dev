@@ -10,7 +10,7 @@ type Props = {
 export const Article: React.FC<Props> = ({ project, views }) => {
 	return (
 		<Link href={`/projects/${project.slug}`}>
-			<article className="p-4 md:p-8">
+			<article className="relative p-4 md:p-8">
 				<div className="flex justify-between gap-2 items-center">
 					<span className="text-xs duration-1000 text-zinc-200 group-hover:text-white group-hover:border-zinc-200 drop-shadow-orange">
 						{project.date ? (
@@ -31,9 +31,14 @@ export const Article: React.FC<Props> = ({ project, views }) => {
 				<h2 className="z-20 text-xl font-medium duration-1000 lg:text-3xl text-zinc-200 group-hover:text-white font-display">
 					{project.title}
 				</h2>
-				<p className="z-20 mt-4 text-sm  duration-1000 text-zinc-400 group-hover:text-zinc-200">
+				<p className="z-20 mt-4 text-sm  duration-1000 text-zinc-400 group-hover:text-zinc-200 pb-8">
 					{project.description}
 				</p>
+				<div className="absolute bottom-4 md:bottom-8">
+					<p className="text-zinc-200 hover:text-zinc-50 text-sm">
+						Read more <span aria-hidden="true">&rarr;</span>
+					</p>
+				</div>
 			</article>
 		</Link>
 	);

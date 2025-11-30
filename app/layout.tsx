@@ -6,19 +6,19 @@ import { Analytics } from "./components/analytics";
 
 export const metadata: Metadata = {
   title: {
-    default: "chronark.com",
-    template: "%s | chronark.com",
+    default: "Odelf Dev",
+    template: "%s | Odelf Dev",
   },
-  description: "Co-founder of unkey.dev and founder of planetfall.io",
+  description: "Software engineer with a Master's degree from a Swiss university, passionate about building innovative solutions and crafting elegant code.",
   openGraph: {
-    title: "chronark.com",
+    title: "Odelf Dev",
     description:
-      "Co-founder of unkey.dev and founder of planetfall.io",
-    url: "https://chronark.com",
-    siteName: "chronark.com",
+      "Software engineer with a Master's degree from a Swiss university, passionate about building innovative solutions and crafting elegant code.",
+    url: "https://github.com/Odelf18/Odelf-dev",
+    siteName: "Odelf Dev",
     images: [
       {
-        url: "https://chronark.com/og.png",
+        url: "/og.png",
         width: 1920,
         height: 1080,
       },
@@ -38,11 +38,13 @@ export const metadata: Metadata = {
     },
   },
   twitter: {
-    title: "Chronark",
+    title: "Odelf Dev",
     card: "summary_large_image",
   },
   icons: {
-    shortcut: "/favicon.png",
+    icon: "/OD.svg",
+    shortcut: "/OD.svg",
+    apple: "/OD.svg",
   },
 };
 const inter = Inter({
