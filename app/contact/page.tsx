@@ -1,6 +1,7 @@
 "use client";
 import { Github, Mail, Twitter } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Navigation } from "../components/nav";
 import { Card } from "../components/card";
 
@@ -28,6 +29,18 @@ const socials = [
 export default function Example() {
 	return (
 		<div className=" bg-gradient-to-tl from-zinc-900/0 via-zinc-900 to-zinc-900/0">
+			<div className="fixed top-4 left-4 z-50 animate-fade-in">
+				<Link href="/">
+					<Image
+						src="/OD.svg"
+						alt="OD Logo"
+						width={80}
+						height={80}
+						className="w-16 h-16 md:w-20 md:h-20 object-contain hover:opacity-80 transition-opacity"
+						priority
+					/>
+				</Link>
+			</div>
 			<Navigation />
 			<div className="container flex items-center justify-center min-h-screen px-4 mx-auto">
 				<div className="grid w-full grid-cols-1 gap-8 mx-auto mt-32 sm:mt-0 sm:grid-cols-3 lg:gap-16">

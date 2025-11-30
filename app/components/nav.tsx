@@ -1,6 +1,6 @@
 "use client";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 
 export const Navigation: React.FC = () => {
@@ -44,9 +44,15 @@ export const Navigation: React.FC = () => {
 
 					<Link
 						href="/"
-						className="duration-200 text-zinc-300 hover:text-zinc-100"
+						className="duration-200 hover:opacity-80 transition-opacity"
 					>
-						<ArrowLeft className="w-6 h-6 " />
+						<Image
+							src="/OD.svg"
+							alt="OD Logo"
+							width={40}
+							height={40}
+							className="w-8 h-8 md:w-10 md:h-10 object-contain"
+						/>
 					</Link>
 				</div>
 			</div>
