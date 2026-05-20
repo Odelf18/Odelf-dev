@@ -1,0 +1,132 @@
+---
+title: Boston Permit Ingest
+description: Open-data ETL pipeline for Boston building permits with a live inspection UI and incremental weekly sync
+date: 2026-05-20
+published: true
+repository: Odelf18/boston-permit-ingest
+url: https://demo-two-dusky-50.vercel.app
+---
+
+## The Project
+
+Boston Permit Ingest is a data pipeline and live demo that pulls real building permit records from Boston’s open data portal. It maps key business fields, keeps only new rows on each sync, and optionally persists them to Supabase — built as a portfolio piece for an AI home renovation estimator.
+
+## How It Works
+
+```
+data.boston.gov → Fetch permits → Watermark + dedup → 
+Merge into table → Optional Supabase upsert → 
+Sunday cron or manual “Run update now”
+```
+
+1. **Load** — The app fetches recent permits from Boston Open Data (CKAN API)
+2. **Browse** — Summary table with expandable rows for all 25 API fields
+3. **Sync** — Incremental update uses `issue_date` watermark and `record_id` deduplication
+4. **Persist** — New rows can be upserted to Supabase when configured
+5. **Schedule** — Vercel cron runs weekly; Python worker available for production ETL
+
+## Key Features
+
+### Data ingestion
+
+- ✅ Live pull from [data.boston.gov](https://data.boston.gov) (725k+ permits)
+- ✅ Maps 9 business fields plus full raw record for inspection
+- ✅ Incremental sync — only rows newer than the watermark
+- ✅ Dedup by CKAN `record_id` (permit numbers repeat for amendments)
+
+### Live demo UI
+
+- ✅ Summary table with 100 recent permits
+- ✅ Expandable detail view for address, fees, geo, comments, and more
+- ✅ Sync control panel with logs and last-sync status
+- ✅ “Run update now” to simulate the weekly incremental job
+
+### Operations
+
+- ✅ Next.js API routes (`/api/permits`, `/api/sync`)
+- ✅ Sunday cron via Vercel (06:00 UTC)
+- ✅ Optional Python pipeline worker for Supabase upsert
+
+## Technical Architecture
+
+The demo is a Next.js 16 app with TypeScript and Tailwind. API routes call Boston’s CKAN `datastore_search`, apply incremental filters client- and server-side, and optionally write to Supabase. A separate Python worker in `pipeline/` handles production batch upserts.
+
+### Tech stack
+
+- **UI & API**: Next.js 16, TypeScript, Tailwind CSS
+- **Hosting**: Vercel
+- **Database**: Supabase (optional)
+- **Worker**: Python 3, `requests`, `supabase-py`
+
+## Code Examples
+
+### Incremental merge with deduplication
+
+```typescript
+export function mergePermitRecords(
+  existing: PermitRecord[],
+  incoming: PermitRecord[],
+  max = 100,
+): PermitRecord[] {
+  return dedupeByRecordId([...incoming, ...existing]).slice(0, max);
+}
+```
+
+### Sync with watermark and known IDs
+
+```typescript
+const since = localStorage.getItem(SINCE_KEY) ?? undefined;
+const knownRecordIds = records.map((r) => r.record_id);
+
+const res = await fetch("/api/sync", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ since, knownRecordIds }),
+});
+```
+
+### Watermark from Supabase when configured
+
+```typescript
+if (!since && isSupabaseConfigured()) {
+  const last = await getLastIssueDate();
+  if (last) since = last;
+}
+const { newRecords, total } = await fetchNewPermits({ since, knownRecordIds: known });
+```
+
+## Results & Performance
+
+- **Real open data** — Production Boston permits, not mock data
+- **Efficient sync** — Fetches only new rows after watermark + dedup
+- **Inspectable pipeline** — Full API fields visible in the UI for validation
+- **Portfolio-ready** — Live demo + GitHub repo + optional Supabase path
+
+## Technical Challenges Solved
+
+1. **Amendment deduplication** — Boston reuses permit numbers; sync keys on CKAN `record_id`
+2. **Incremental boundaries** — `issue_date` watermark avoids re-fetching the full dataset
+3. **Dual runtimes** — Next.js for demo/API; Python worker for scheduled production upserts
+4. **Cron security** — Optional `CRON_SECRET` bearer auth on sync endpoint
+5. **Graceful degradation** — UI works without Supabase; persistence is optional
+
+## Technologies Used
+
+- Next.js 16
+- TypeScript
+- Tailwind CSS
+- Supabase
+- Python 3
+- Vercel (hosting + cron)
+- Boston Open Data (CKAN)
+
+## Project Overview
+
+This project demonstrates:
+
+- **Open-data ETL** — CKAN ingestion, field mapping, and incremental sync
+- **Full-stack delivery** — Live Vercel demo with API routes and inspection UI
+- **Data engineering** — Watermarks, dedup, cron, and optional warehouse (Supabase)
+- **Production awareness** — Python worker, schema SQL, and documented deploy paths
+
+The live app lets visitors browse permits and trigger a sync; the repo documents the full pipeline for a renovation-estimator data layer.
