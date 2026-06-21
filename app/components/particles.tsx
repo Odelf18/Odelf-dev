@@ -25,6 +25,7 @@ export default function Particles({
 	const mousePosition = useMousePosition();
 	const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 	const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
+	const rafId = useRef<number>(0);
 	const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
 
 	useEffect(() => {
@@ -37,12 +38,9 @@ export default function Particles({
 
 		return () => {
 			window.removeEventListener("resize", initCanvas);
+			window.cancelAnimationFrame(rafId.current);
 		};
 	}, []);
-
-	useEffect(() => {
-		onMouseMove();
-	}, [mousePosition.x, mousePosition.y]);
 
 	useEffect(() => {
 		initCanvas();
@@ -57,8 +55,8 @@ export default function Particles({
 		if (canvasRef.current) {
 			const rect = canvasRef.current.getBoundingClientRect();
 			const { w, h } = canvasSize.current;
-			const x = mousePosition.x - rect.left - w / 2;
-			const y = mousePosition.y - rect.top - h / 2;
+			const x = mousePosition.current.x - rect.left - w / 2;
+			const y = mousePosition.current.y - rect.top - h / 2;
 			const inside = x < w / 2 && x > -w / 2 && y < h / 2 && y > -h / 2;
 			if (inside) {
 				mouse.current.x = x;
@@ -167,6 +165,12 @@ export default function Particles({
 	};
 
 	const animate = () => {
+		// Pause the loop while the tab is hidden to save CPU.
+		if (typeof document !== "undefined" && document.hidden) {
+			rafId.current = window.requestAnimationFrame(animate);
+			return;
+		}
+		onMouseMove();
 		clearContext();
 		circles.current.forEach((circle: Circle, i: number) => {
 			// Handle the alpha value
@@ -223,7 +227,7 @@ export default function Particles({
 				);
 			}
 		});
-		window.requestAnimationFrame(animate);
+		rafId.current = window.requestAnimationFrame(animate);
 	};
 
 	return (

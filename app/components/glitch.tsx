@@ -28,6 +28,7 @@ export const GlitchFx: React.FC<GlitchFxProps> = ({
         .glitch-wrapper {
           position: relative;
           display: inline-block;
+          will-change: transform;
         }
 
         .glitch-wrapper.glitch-slow {
@@ -42,27 +43,29 @@ export const GlitchFx: React.FC<GlitchFxProps> = ({
           animation: glitch-anim-fast 2s infinite;
         }
 
+        /* Respect users who prefer reduced motion. */
+        @media (prefers-reduced-motion: reduce) {
+          .glitch-wrapper {
+            animation: none !important;
+          }
+        }
+
         @keyframes glitch-anim-slow {
           0%,
           100% {
             transform: translate(0);
-            filter: hue-rotate(0deg);
           }
           20% {
             transform: translate(-2px, 2px);
-            filter: hue-rotate(90deg);
           }
           40% {
             transform: translate(-2px, -2px);
-            filter: hue-rotate(180deg);
           }
           60% {
             transform: translate(2px, 2px);
-            filter: hue-rotate(270deg);
           }
           80% {
             transform: translate(2px, -2px);
-            filter: hue-rotate(360deg);
           }
         }
 
@@ -70,27 +73,21 @@ export const GlitchFx: React.FC<GlitchFxProps> = ({
           0%,
           100% {
             transform: translate(0);
-            filter: hue-rotate(0deg) brightness(1);
           }
           10% {
             transform: translate(-1px, 1px);
-            filter: hue-rotate(90deg) brightness(1.1);
           }
           20% {
             transform: translate(1px, -1px);
-            filter: hue-rotate(180deg) brightness(0.9);
           }
           30% {
             transform: translate(-1px, -1px);
-            filter: hue-rotate(270deg) brightness(1.05);
           }
           40% {
             transform: translate(1px, 1px);
-            filter: hue-rotate(360deg) brightness(0.95);
           }
           50% {
             transform: translate(0);
-            filter: hue-rotate(0deg) brightness(1);
           }
         }
 
@@ -98,27 +95,21 @@ export const GlitchFx: React.FC<GlitchFxProps> = ({
           0%,
           100% {
             transform: translate(0);
-            filter: hue-rotate(0deg) brightness(1);
           }
           5% {
             transform: translate(-1px, 1px);
-            filter: hue-rotate(90deg) brightness(1.1);
           }
           10% {
             transform: translate(1px, -1px);
-            filter: hue-rotate(180deg) brightness(0.9);
           }
           15% {
             transform: translate(-1px, -1px);
-            filter: hue-rotate(270deg) brightness(1.05);
           }
           20% {
             transform: translate(1px, 1px);
-            filter: hue-rotate(360deg) brightness(0.95);
           }
           25% {
             transform: translate(0);
-            filter: hue-rotate(0deg) brightness(1);
           }
         }
       `}</style>
