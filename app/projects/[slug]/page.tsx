@@ -51,7 +51,13 @@ export default async function PostPage({ params }: Props) {
   let views = baseOffset;
   if (redis) {
     try {
-      const redisViews = (await redis.get<number>(["pageviews", "projects", slug].join(":"))) ?? 0;
+      const redisViews =
+        (await Promise.race([
+          redis.get<number>(["pageviews", "projects", slug].join(":")),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("redis timeout")), 1000),
+          ),
+        ])) ?? 0;
       views = redisViews + baseOffset;
     } catch (error) {
       // If Redis fails, fallback to base offset

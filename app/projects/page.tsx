@@ -30,9 +30,14 @@ export default async function ProjectsPage() {
   
   if (redis) {
     try {
-      const viewValues = await redis.mget<number[]>(
-        ...allProjects.map((p) => ["pageviews", "projects", p.slug].join(":")),
-      );
+      const viewValues = await Promise.race([
+        redis.mget<number[]>(
+          ...allProjects.map((p) => ["pageviews", "projects", p.slug].join(":")),
+        ),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("redis timeout")), 1000),
+        ),
+      ]);
       views = viewValues.reduce((acc, v, i) => {
         const slug = allProjects[i].slug;
         acc[slug] = (v ?? 0) + getViewsOffset(slug);
